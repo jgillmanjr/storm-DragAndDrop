@@ -1,0 +1,6 @@
+{
+	"require":
+	{
+		"liquidweb/php-stormondemand":"dev-master"
+	}
+}
