@@ -1,0 +1,56 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "a6b4808718b4eaabd280a9ff0a5fd28d",
+    "packages": [
+        {
+            "name": "liquidweb/php-stormondemand",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/liquidweb/php-stormondemand.git",
+                "reference": "aee6e0ea6bba37e1aed56148bbc0a3e03d645deb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/liquidweb/php-stormondemand/zipball/aee6e0ea6bba37e1aed56148bbc0a3e03d645deb",
+                "reference": "aee6e0ea6bba37e1aed56148bbc0a3e03d645deb",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "StormAPI.class.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "description": "PHP bindings for the StormOnDemand API",
+            "homepage": "https://github.com/liquidweb/php-stormondemand",
+            "time": "2013-11-05 14:38:11"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "liquidweb/php-stormondemand": 20
+    },
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
+}
