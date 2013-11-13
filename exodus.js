@@ -3,6 +3,10 @@
  * @author Jason Gillman Jr. <jgillman@liquidweb.com>
  */
 
+globalData = new Object();
+parentConfig = new Object();
+instanceData = new Object();
+
 function credCheck() // Make sure the creds are legit, yo
 {
 	$.ajax('apiProxy.php',
@@ -23,7 +27,9 @@ function credCheck() // Make sure the creds are legit, yo
 					}
 					else
 					{
-						getParents($("#loginUser").val(), $("#loginPass").val());
+						globalData.user = $("#loginUser").val();
+						globalData.pass = $("#loginPass").val();
+						getParents(globalData.user, globalData.pass);
 						$(".loginForm").fadeOut(800);
 					}
 				}
@@ -65,10 +71,9 @@ function getParents(username, password)
 						
 						for(i = 0; i <= (ppCount - 1); ++i)
 						{
-							$("select.privateParent").append("<option value=\"" + data[i]["uniq_id"] + "\">" + data[i]["domain"] + "</option>");
+							$("select.privateParent").append("<option value=\"" + data[i]["uniq_id"] + "\">" + data[i]["domain"] + " // " +  data[i]["uniq_id"] +"</option>");
+							parentConfig[data[i]["uniq_id"]] = data[i]["config_id"];
 						}
-						
-
 					}
 					else
 					{
@@ -80,7 +85,85 @@ function getParents(username, password)
 	);
 }
 
-function getChildren(username, password, uniqId) // My babies! Will someone pleeease save my babies!?!
+function setUniqID()
 {
+	globalData.parentUniqID = $("select.privateParent").val();
+	globalData.parentConfig = parentConfig[globalData.parentUniqID];
+	console.log(globalData.parentUniqID);
+	console.log(globalData.parentConfig);
+	getChildren();
+}
+
+function getChildren() // My babies! Will someone pleeease save my babies!?!
+{
+	if($("div.childInformation").length == 0)
+	{
+		$.ajax('instanceInfo.html',
+			{
+				type: 'GET',
+				async: false,
+				success:
+					function(data, textStatus, jqXHR)
+					{
+						$("body").append(data);
+					}
+			}
+		);
+	}
 	
+	
+	$.ajax('apiProxy.php',
+		{
+			type: 'POST',
+			dataType: 'json',
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					activity: "getChildren",
+					parentUniqID: globalData.parentUniqID
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					if(Object.keys(data).length > 0) // We have instances
+					{
+						instanceCount = Object.keys(data).length;
+						var i;
+						
+						if($("pre.childInformation").length == 0)
+						{
+							for(i = 0; i <= (instanceCount - 1); ++i)
+							{
+								$(":button.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+							}
+						}
+						else // Already have dataz
+						{
+							$("pre.childInformation").remove();
+							for(i = 0; i <= (instanceCount - 1); ++i)
+							{
+								$(":button.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+								$(":button.childInformation").removeAttr("disabled"); //Just in case this was set
+							}
+						}
+						
+					}
+					else
+					{
+						if($("pre.childInformation").length == 0)
+						{
+							$(":button.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
+						}
+						else
+						{
+							$("pre.childInformation").remove();
+							$(":button.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
+						}
+						
+						$(":button.childInformation").attr("disabled", "disabled");
+					}
+				}
+		}
+	);
 }
