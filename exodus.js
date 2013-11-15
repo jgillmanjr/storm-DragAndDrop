@@ -5,7 +5,7 @@
 
 globalData = new Object();
 parentConfig = new Object();
-instanceData = new Object();
+instances = new Array();
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -42,6 +42,7 @@ function getParents(username, password)
 	$.ajax('initForm.html',
 		{
 			type: 'GET',
+			cache: false,
 			async: false,
 			success:
 				function(data, textStatus, jqXHR)
@@ -101,6 +102,7 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 		$.ajax('instanceInfo.html',
 			{
 				type: 'GET',
+				cache: false,
 				async: false,
 				success:
 					function(data, textStatus, jqXHR)
@@ -125,7 +127,7 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 				},
 			success:
 				function(data, textStatus, jqXHR)
-				{
+				{	
 					if(Object.keys(data).length > 0) // We have instances
 					{
 						instanceCount = Object.keys(data).length;
@@ -135,15 +137,25 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 						{
 							for(i = 0; i <= (instanceCount - 1); ++i)
 							{
-								$(":button.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+								instances[i] = new Object();
+								instances[i].uniq_id = data[i]["uniq_id"];
+								instances[i].disk = data[i]["diskspace"];
+								instances[i].memory = data[i]["memory"];
+								instances[i].vcpu = data[i]["vcpu"];
+								$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
 							}
 						}
-						else // Already have dataz
+						else // Already have dataz displayed
 						{
 							$("pre.childInformation").remove();
 							for(i = 0; i <= (instanceCount - 1); ++i)
 							{
-								$(":button.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+								instances[i] = new Object();
+								instances[i].uniq_id = data[i]["uniq_id"];
+								instances[i].disk = data[i]["diskspace"];
+								instances[i].memory = data[i]["memory"];
+								instances[i].vcpu = data[i]["vcpu"];
+								$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
 								$(":button.childInformation").removeAttr("disabled"); //Just in case this was set
 							}
 						}
@@ -153,16 +165,40 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 					{
 						if($("pre.childInformation").length == 0)
 						{
-							$(":button.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
+							$(":text.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
 						}
 						else
 						{
 							$("pre.childInformation").remove();
-							$(":button.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
+							$(":text.childInformation").before("<pre class=\"childInformation\">No Children on this parent</pre>");
 						}
 						
 						$(":button.childInformation").attr("disabled", "disabled");
 					}
+				}
+		}
+	);
+}
+
+function frequentWind()
+{
+	$.ajax('apiProxy.php',
+		{
+			type: 'POST',
+			//dataType: 'json',
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					activity: "frequentWind",
+					parentConfig: globalData.parentConfig,
+					newParentName: $(":text.childInformation").val(),
+					parentChildren: JSON.stringify(instances)
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					$("div.childInformation").append("<pre>" + data + "</pre>");
 				}
 		}
 	);
