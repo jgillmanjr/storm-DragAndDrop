@@ -180,7 +180,7 @@ function frequentWind()
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					$("div.childInformation").append("<pre>" + data + "</pre>");
+					$("#final").append("<pre>" + data + "</pre>");
 				}
 		}
 	);
