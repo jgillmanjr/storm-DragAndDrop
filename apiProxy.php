@@ -52,32 +52,32 @@
 		$params = NULL;
 		$version = 'bleed';
 		$method = 'Storm/Private/Parent/create';
-		$instances = json_decode($_POST['parentChildren'], TRUE);
-		
+		$instances = $_POST['parentChildren'];
+
 		$storm = new StormAPI($user, $pass, $method, $params, $version);
 		$storm->addParam('config_id', $_POST['parentConfig']);
 		$storm->addParam('domain', $_POST['newParentName']);
 		$storm->addParam('zone', $_POST['parentZone']);
 		
 		$returnArray['ppCreate'] = $storm->request();
-		
+
 		if(isset($returnArray['ppCreate']['uniq_id'])) // Make sure the parent created before resizing
 		{
 			$storm->newMethod('Storm/Server/resize');
 			$storm->addParam('config_id', 0);
 			$storm->addParam('parent', $returnArray['ppCreate']['uniq_id']);
 			
-			foreach($instances as $instance)
+			foreach($instances as $uid => $instance)
 			{
 				$storm->addParam('uniq_id', $instance['uniq_id']);
-				$storm->addParam('diskspace', $instance['disk']);
+				$storm->addParam('diskspace', $instance['diskspace']);
 				$storm->addParam('memory', $instance['memory']);
 				$storm->addParam('vcpu', $instance['vcpu']);
 				
 				$returnArray[$instance['uniq_id']] = $storm->request(TRUE)['display'];
 			}	
 		}
-		
+
 		print_r($returnArray);
 		/*
 		// Testing Stuff \\

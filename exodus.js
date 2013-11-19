@@ -5,7 +5,7 @@
 
 globalData = new Object();
 parentConfig = new Object();
-instances = new Array();
+instances = new Object();
 parentData = new Array();
 
 function credCheck() // Make sure the creds are legit, yo
@@ -124,33 +124,18 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 						instanceCount = Object.keys(data).length;
 						var i;
 						
-						if($("pre.childInformation").length == 0)
+						if($("pre.childInformation").length != 0) // Existing dataz
 						{
-							for(i = 0; i <= (instanceCount - 1); ++i)
-							{
-								instances[i] = new Object();
-								instances[i].uniq_id = data[i]["uniq_id"];
-								instances[i].disk = data[i]["diskspace"];
-								instances[i].memory = data[i]["memory"];
-								instances[i].vcpu = data[i]["vcpu"];
-								$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
-							}
-						}
-						else // Already have dataz displayed
-						{
-							$("pre.childInformation").remove();
-							for(i = 0; i <= (instanceCount - 1); ++i)
-							{
-								instances[i] = new Object();
-								instances[i].uniq_id = data[i]["uniq_id"];
-								instances[i].disk = data[i]["diskspace"];
-								instances[i].memory = data[i]["memory"];
-								instances[i].vcpu = data[i]["vcpu"];
-								$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
-								$(":button.childInformation").removeAttr("disabled"); //Just in case this was set
-							}
+							$("pre.childInformation").remove(); // Clear out the existing dataz
 						}
 						
+						for(i = 0; i <= (instanceCount - 1); ++i)
+						{
+							instances[data[i]["uniq_id"]] = data[i]; // All the returned dataz
+							$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+						}
+						
+						$(":button.childInformation").removeAttr("disabled"); //Just in case this was set
 					}
 					else
 					{
@@ -189,7 +174,7 @@ function frequentWind()
 					activity: "frequentWind",
 					parentConfig: globalData.parentConfig,
 					newParentName: $(":text.childInformation").val(),
-					parentChildren: JSON.stringify(instances),
+					parentChildren: instances,
 					parentZone: globalData.parentZone
 				},
 			beforeSend:
