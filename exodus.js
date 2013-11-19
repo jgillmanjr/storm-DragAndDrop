@@ -30,6 +30,7 @@ function credCheck() // Make sure the creds are legit, yo
 						globalData.user = $("#loginUser").val();
 						globalData.pass = $("#loginPass").val();
 						getParents(globalData.user, globalData.pass);
+						$("#mainBody").tabs("disable", "final"); // Just in case the account is changed
 					}
 				}
 		}
