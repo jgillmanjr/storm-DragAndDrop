@@ -8,12 +8,28 @@
 	</head>
 	
 	<body>
-		<form name="login" class="loginForm">
-			<label for="user" class="loginForm">Username</label>
-			<input type="text" id="loginUser" name="loginUser" class="loginForm"><br />
-			<label for="pass" class="loginForm">Password</label>
-			<input type="password" id="loginPass" name="loginPass" class="loginForm"><br />
-			<input type="button" value="Execute" class="loginForm" onclick="credCheck();">
-		</form>
+		<div id="mainBody">
+			<ul>
+				<li><a href="#login">Credentials</a></li>
+				<li><a href="#ppSelect">Select Private Parent</a></li>
+				<li><a href="#final">Final Verification and Execution</a></li>
+			</ul>
+			<div id="login">
+				<form name="login" class="loginForm">
+					<label for="user" class="loginForm">Username</label>
+					<input type="text" id="loginUser" name="loginUser" class="loginForm"><br />
+					<label for="pass" class="loginForm">Password</label>
+					<input type="password" id="loginPass" name="loginPass" class="loginForm"><br />
+					<input type="button" value="Execute" class="loginForm" onclick="credCheck();">
+				</form>
+			</div>
+			<div id="ppSelect">
+			</div>
+			<div id="final">
+			</div>
+		</div>
+		<script>
+			$("#mainBody").tabs().tabs("option", "disabled", [1, 2]);
+		</script>
 	</body>
 </html>

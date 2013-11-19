@@ -30,7 +30,6 @@ function credCheck() // Make sure the creds are legit, yo
 						globalData.user = $("#loginUser").val();
 						globalData.pass = $("#loginPass").val();
 						getParents(globalData.user, globalData.pass);
-						$(".loginForm").fadeOut(800);
 					}
 				}
 		}
@@ -39,18 +38,9 @@ function credCheck() // Make sure the creds are legit, yo
 
 function getParents(username, password)
 {
-	$.ajax('initForm.html',
-		{
-			type: 'GET',
-			cache: false,
-			async: false,
-			success:
-				function(data, textStatus, jqXHR)
-				{
-					$("body").append(data);
-				}
-		}
-	);
+	$("#mainBody").tabs("enable", "ppSelect");
+	$("#mainBody").tabs("option", "active", 1);
+	$("#ppSelect").load("includes/initForm.html");
 	
 	$.ajax('apiProxy.php',
 		{
@@ -97,22 +87,13 @@ function setUniqID()
 
 function getChildren() // My babies! Will someone pleeease save my babies!?!
 {
-	if($("div.childInformation").length == 0)
-	{
-		$.ajax('instanceInfo.html',
-			{
-				type: 'GET',
-				cache: false,
-				async: false,
-				success:
-					function(data, textStatus, jqXHR)
-					{
-						$("body").append(data);
-					}
-			}
-		);
-	}
+	$("#mainBody").tabs("enable", "final");
+	$("#mainBody").tabs("option", "active", 2);
 	
+	if($("#final").length == 1)
+	{
+		$("#final").load("includes/instanceInfo.html");
+	}
 	
 	$.ajax('apiProxy.php',
 		{
