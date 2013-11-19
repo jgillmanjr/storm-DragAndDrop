@@ -1,8 +1,6 @@
 <?php
 	require('vendor/autoload.php');
 	
-	
-	
 	if($_POST['activity'] == "credCheck")
 	{
 		$user = $_POST['user'];
@@ -59,6 +57,7 @@
 		$storm = new StormAPI($user, $pass, $method, $params, $version);
 		$storm->addParam('config_id', $_POST['parentConfig']);
 		$storm->addParam('domain', $_POST['newParentName']);
+		$storm->addParam('zone', $_POST['parentZone']);
 		
 		$returnArray['ppCreate'] = $storm->request();
 		

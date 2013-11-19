@@ -6,6 +6,7 @@
 globalData = new Object();
 parentConfig = new Object();
 instances = new Array();
+parentData = new Array();
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -63,6 +64,8 @@ function getParents(username, password)
 						
 						for(i = 0; i <= (ppCount - 1); ++i)
 						{
+							parentData[data[i]["uniq_id"]] = data[i]; // Load all the parent returned data for future use if needed. Keyed by uniq_id
+							
 							$("select.privateParent").append("<option value=\"" + data[i]["uniq_id"] + "\">" + data[i]["domain"] + " // " +  data[i]["uniq_id"] +"</option>");
 							parentConfig[data[i]["uniq_id"]] = data[i]["config_id"];
 						}
@@ -81,6 +84,7 @@ function setUniqID()
 {
 	globalData.parentUniqID = $("select.privateParent").val();
 	globalData.parentConfig = parentConfig[globalData.parentUniqID];
+	globalData.parentZone = parentData[globalData.parentUniqID]["zone"]["id"];
 	console.log(globalData.parentUniqID);
 	console.log(globalData.parentConfig);
 	getChildren();
@@ -175,7 +179,8 @@ function frequentWind()
 					activity: "frequentWind",
 					parentConfig: globalData.parentConfig,
 					newParentName: $(":text.childInformation").val(),
-					parentChildren: JSON.stringify(instances)
+					parentChildren: JSON.stringify(instances),
+					parentZone: globalData.parentZone
 				},
 			success:
 				function(data, textStatus, jqXHR)
