@@ -111,6 +111,11 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 					activity: "getChildren",
 					parentUniqID: globalData.parentUniqID
 				},
+			beforeSend:
+				function()
+				{
+					$("#progBar").progressbar({value: false});
+				},
 			success:
 				function(data, textStatus, jqXHR)
 				{	
@@ -161,6 +166,11 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 						
 						$(":button.childInformation").attr("disabled", "disabled");
 					}
+				},
+			complete:
+				function()
+				{
+					$("#progBar").progressbar("destroy");
 				}
 		}
 	);
@@ -182,10 +192,20 @@ function frequentWind()
 					parentChildren: JSON.stringify(instances),
 					parentZone: globalData.parentZone
 				},
+			beforeSend:
+				function()
+				{
+					$("#progBar").progressbar({value: false});
+				},
 			success:
 				function(data, textStatus, jqXHR)
 				{
 					$("#final").append("<pre>" + data + "</pre>");
+				},
+			complete:
+				function()
+				{
+					$("#progBar").progressbar("destroy");
 				}
 		}
 	);
