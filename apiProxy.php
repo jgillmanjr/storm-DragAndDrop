@@ -52,7 +52,7 @@
 		$params = NULL;
 		$version = 'bleed';
 		$method = 'Storm/Private/Parent/create';
-		$instances = $_POST['parentChildren'];
+		$instances = json_decode($_POST['parentChildrenData'], TRUE);
 
 		$storm = new StormAPI($user, $pass, $method, $params, $version);
 		$storm->addParam('config_id', $_POST['parentConfig']);
@@ -67,15 +67,15 @@
 			$storm->addParam('config_id', 0);
 			$storm->addParam('parent', $returnArray['ppCreate']['uniq_id']);
 			
-			foreach($instances as $uid => $instance)
+			foreach($_POST['selectedInstances'] as $instance)
 			{
-				$storm->addParam('uniq_id', $instance['uniq_id']);
-				$storm->addParam('diskspace', $instance['diskspace']);
-				$storm->addParam('memory', $instance['memory']);
-				$storm->addParam('vcpu', $instance['vcpu']);
+				$storm->addParam('uniq_id', $instance);
+				$storm->addParam('diskspace', $instances[$instance]['diskspace']);
+				$storm->addParam('memory', $instances[$instance]['memory']);
+				$storm->addParam('vcpu', $instances[$instance]['vcpu']);
 				
-				$returnArray[$instance['uniq_id']] = $storm->request(TRUE)['display'];
-			}	
+				$returnArray[$instance] = $storm->request(TRUE)['display'];
+			}
 		}
 
 		print_r($returnArray);
@@ -83,8 +83,9 @@
 		// Testing Stuff \\
 		$returnArray['user'] = $user;
 		$returnArray['pass'] = $pass;
-		$returnArray['instances'] = $_POST['parentChildren'];
+		$returnArray['instances'] = json_decode($_POST['parentChildrenData'], TRUE);
 		$returnArray['newParentName'] = $_POST['newParentName'];
+		$returnArray['selectedInstances'] = $_POST['selectedInstances'];
 		
 		print_r($returnArray);
 		// End Testing Stuff\\

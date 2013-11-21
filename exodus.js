@@ -7,6 +7,7 @@ globalData = new Object();
 parentConfig = new Object();
 instances = new Object();
 parentData = new Array();
+selectedInstances = new Array();
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -111,11 +112,6 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 					activity: "getChildren",
 					parentUniqID: globalData.parentUniqID
 				},
-			beforeSend:
-				function()
-				{
-					$("#progBar").progressbar({value: false});
-				},
 			success:
 				function(data, textStatus, jqXHR)
 				{	
@@ -132,7 +128,9 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 						for(i = 0; i <= (instanceCount - 1); ++i)
 						{
 							instances[data[i]["uniq_id"]] = data[i]; // All the returned dataz
-							$(":text.childInformation").before("<pre class=\"childInformation\">UniqID: " + data[i]["uniq_id"]  + " Domain: " + data[i]["domain"] + "</pre>");
+							instanceCheckBox = "<input class=\"childInstance\" type=\"checkbox\" value=\"" + data[i]["uniq_id"] + "\">";
+							instanceString = "<pre class=\"childInformation\">" + data[i]["domain"] + " // " + data[i]["uniq_id"]  + instanceCheckBox + "</pre>";
+							$(":text.childInformation").before(instanceString);
 						}
 						
 						$(":button.childInformation").removeAttr("disabled"); //Just in case this was set
@@ -152,17 +150,34 @@ function getChildren() // My babies! Will someone pleeease save my babies!?!
 						$(":button.childInformation").attr("disabled", "disabled");
 					}
 				},
-			complete:
-				function()
-				{
-					$("#progBar").progressbar("destroy");
-				}
 		}
 	);
 }
 
+function selectedCheck()
+{
+	$("#operationStatus").remove(); // Clear out old status
+	
+	$(".childInstance:checked").each(
+		function()
+		{
+			selectedInstances.push($(this).val());
+		}
+	);
+	
+	if(selectedInstances.length > 0) // Make sure that there are instances selected...
+	{
+		frequentWind();
+	}
+	else	
+	{
+		alert("Select at least one instance");
+	}
+}
+
 function frequentWind()
 {
+
 	$.ajax('apiProxy.php',
 		{
 			type: 'POST',
@@ -174,8 +189,9 @@ function frequentWind()
 					activity: "frequentWind",
 					parentConfig: globalData.parentConfig,
 					newParentName: $(":text.childInformation").val(),
-					parentChildren: instances,
-					parentZone: globalData.parentZone
+					parentChildrenData: JSON.stringify(instances),
+					parentZone: globalData.parentZone,
+					selectedInstances: selectedInstances
 				},
 			beforeSend:
 				function()
@@ -185,7 +201,7 @@ function frequentWind()
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					$("#final").append("<pre>" + data + "</pre>");
+					$("#final").append("<pre id=\"operationStatus\">" + data + "</pre>");
 				},
 			complete:
 				function()
@@ -194,4 +210,5 @@ function frequentWind()
 				}
 		}
 	);
+	selectedInstances = new Array();
 }
