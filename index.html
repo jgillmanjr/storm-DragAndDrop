@@ -1,18 +1,19 @@
 <html>
 	<head>
-		<title>Private Parent CASEVAC</title>
-		<link rel="stylesheet" href="includes/jquery-ui-1.10.3.custom.css" />
-		<script src="includes/jquery-2.0.3.min.js"></script>
-		<script src="includes/jquery-ui-1.10.3.custom.min.js"></script>
-		<script src="exodus.js"></script>
+		<title>Instance Mover</title>
+		<link rel="stylesheet" href="includes/css/jquery-ui-1.10.3.custom.css" />
+		<link rel="stylesheet" href="includes/css/styleSheet.css" />
+		<script src="includes/js/jquery-2.0.3.min.js"></script>
+		<script src="includes/js/jquery-ui-1.10.3.custom.min.js"></script>
+		<script src="includes/js/packery.pkgd.min.js"></script>
+		<script src="includes/js/main.js"></script>
+		<script src="includes/js/builder.js"></script>
 	</head>
-	
 	<body>
 		<div id="mainBody">
 			<ul>
 				<li><a href="#login">Credentials</a></li>
-				<li><a href="#ppSelect">Select Private Parent</a></li>
-				<li><a href="#final">Final Verification and Execution</a></li>
+				<li><a href="#locationBoard">Instance Locations</a></li>
 			</ul>
 			<div id="login">
 				<form name="login" class="loginForm">
@@ -23,13 +24,11 @@
 					<input type="button" value="Execute" class="loginForm" onclick="credCheck();">
 				</form>
 			</div>
-			<div id="ppSelect">
-			</div>
-			<div id="final">
+			<div id="locationBoard">
 			</div>
 		</div>
 		<script>
-			$("#mainBody").tabs().tabs("option", "disabled", [1, 2]);
+			$("#mainBody").tabs().tabs("option", "disabled", [1]);
 		</script>
 	</body>
 </html>

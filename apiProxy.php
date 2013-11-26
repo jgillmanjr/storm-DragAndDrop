@@ -1,94 +1,24 @@
 <?php
 	require('vendor/autoload.php');
 	
-	if($_POST['activity'] == "credCheck")
+	// Because cross site AJAX calls are a pain
+	
+	$user = $_POST['user'];
+	$pass = $_POST['pass'];
+	$method = $_POST['method'];
+	
+	if($_POST['params'])
 	{
-		$user = $_POST['user'];
-		$pass = $_POST['pass'];
+		$params = json_decode($_POST['params'], TRUE); // Using JSON to pass in params since, well, JS doesn't do associative arrays like PHP
+	}
+	else
+	{
 		$params = NULL;
-		$version = 'bleed';
-		$method = 'Utilities/Info/ping';
-		
-		$storm = new StormAPI($user, $pass, $method, $params, $version);
-		
-		echo json_encode($storm->request());
 	}
 	
-	if($_POST['activity'] == "getParents")
-	{
-		$user = $_POST['user'];
-		$pass = $_POST['pass'];
-		$params = NULL;
-		$version = 'bleed';
-		$method = 'Storm/Private/Parent/list';
-		
-		$storm = new StormAPI($user, $pass, $method, $params, $version);
-		$storm->addParam('page_size', 999);
-		
-		echo json_encode($storm->request()['items']);
-	}
+	$version = 'bleed'; // All the cool kids use bleed... plus we need it for private parent stuff
 	
-	if($_POST['activity'] == "getChildren")
-	{
-		$user = $_POST['user'];
-		$pass = $_POST['pass'];
-		$params = NULL;
-		$version = 'bleed';
-		$method = 'Storm/Server/list';
+	$storm = new StormAPI($user, $pass, $method, $params, $version);
 	
-		$storm = new StormAPI($user, $pass, $method, $params, $version);
-		$storm->addParam('page_size', 999);
-		$storm->addParam('parent', $_POST['parentUniqID']);
-	
-		$instances = $storm->request()['items'];
-		
-		echo json_encode($instances);
-	}
-	
-	if($_POST['activity'] == "frequentWind")
-	{
-		$user = $_POST['user'];
-		$pass = $_POST['pass'];
-		$params = NULL;
-		$version = 'bleed';
-		$method = 'Storm/Private/Parent/create';
-		$instances = json_decode($_POST['parentChildrenData'], TRUE);
-
-		$storm = new StormAPI($user, $pass, $method, $params, $version);
-		$storm->addParam('config_id', $_POST['parentConfig']);
-		$storm->addParam('domain', $_POST['newParentName']);
-		$storm->addParam('zone', $_POST['parentZone']);
-		
-		$returnArray['ppCreate'] = $storm->request();
-
-		if(isset($returnArray['ppCreate']['uniq_id'])) // Make sure the parent created before resizing
-		{
-			$storm->newMethod('Storm/Server/resize');
-			$storm->addParam('config_id', 0);
-			$storm->addParam('parent', $returnArray['ppCreate']['uniq_id']);
-			
-			foreach($_POST['selectedInstances'] as $instance)
-			{
-				$storm->addParam('uniq_id', $instance);
-				$storm->addParam('diskspace', $instances[$instance]['diskspace']);
-				$storm->addParam('memory', $instances[$instance]['memory']);
-				$storm->addParam('vcpu', $instances[$instance]['vcpu']);
-				
-				$returnArray[$instance] = $storm->request(TRUE)['display'];
-			}
-		}
-
-		print_r($returnArray);
-		/*
-		// Testing Stuff \\
-		$returnArray['user'] = $user;
-		$returnArray['pass'] = $pass;
-		$returnArray['instances'] = json_decode($_POST['parentChildrenData'], TRUE);
-		$returnArray['newParentName'] = $_POST['newParentName'];
-		$returnArray['selectedInstances'] = $_POST['selectedInstances'];
-		
-		print_r($returnArray);
-		// End Testing Stuff\\
-		*/
-	}
+	echo json_encode($storm->request());
 ?>

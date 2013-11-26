@@ -1,0 +1,45 @@
+div.instanceLocation
+{
+	border: 1px solid #808080;
+	min-height: 50px;
+	min-width: 300px;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+div.instance
+{
+	border: 1px dashed #808080;
+	margin-top: 10px;
+	border-radius: 10px;
+	padding: 10px;
+}
+
+p.header
+{
+	text-align: center;
+	margin: 2px;
+}
+
+p.locationHeader
+{
+	text-decoration: underline;
+}
+
+p.instanceHeader
+{
+	font-size: 20px;
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+#locationBoard
+{
+	min-height: 500px;
+}
+
+p.instanceData
+{
+	margin: 0;
+	font-size: 15px; 
+}
