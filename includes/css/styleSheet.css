@@ -2,9 +2,9 @@ div.instanceLocation
 {
 	border: 1px solid #808080;
 	min-height: 50px;
-	min-width: 300px;
     padding: 10px;
     border-radius: 25px;
+    text-align: center;
 }
 
 div.instance
@@ -13,6 +13,7 @@ div.instance
 	margin-top: 10px;
 	border-radius: 10px;
 	padding: 10px;
+	display: inline-block;
 }
 
 p.header
@@ -42,4 +43,9 @@ p.instanceData
 {
 	margin: 0;
 	font-size: 15px; 
+}
+
+div.instance:hover
+{
+	background-color: rgba(188, 207,209, 20)
 }

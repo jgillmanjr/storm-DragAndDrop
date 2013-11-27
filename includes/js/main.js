@@ -123,6 +123,31 @@ function getInstancesAndParents()
 	
 	//$(".instanceLocation").draggable();
 	//$locationBoard.packery('bindUIDraggableEvents', $(".instanceLocation"));
-	$(".instance").draggable();
+	$(".instance").draggable(
+		{
+			revert: "invalid"
+		}
+	); // Make the instance divs draggable
+	
+	// Make them droppable
+	$(".instanceLocation").droppable(
+		{
+			accept: function(draggable)
+			{
+				if($(draggable).attr("data-zone") == $(this).attr("data-zone")) {return true;}
+			},
+			drop: function(event, ui)
+				{
+					$(ui.draggable).css({top: 0, left: 0}).appendTo($(this)); // Actually relocate the instance div
+				
+					if($(this).height() > $("#locationBoard").height()) // Upsize #locationBoard if needed
+					{
+						$("#locationBoard").height($(this).height() + 20);
+					}
+					
+					$locationBoard.packery(); // Rerun this to prevent overflow issues..
+				}
+		}
+	);
 	// End display stuff \\
 }
