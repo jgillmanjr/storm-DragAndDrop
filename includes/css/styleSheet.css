@@ -49,3 +49,10 @@ div.instance:hover
 {
 	background-color: rgba(188, 207,209, 20)
 }
+
+#controlBar
+{
+	position: relative;
+	top: 90%;
+	border-top: 1px solid #808080;
+}

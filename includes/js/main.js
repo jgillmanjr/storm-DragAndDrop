@@ -3,9 +3,8 @@
  * @author Jason Gillman Jr. <jgillman@liquidweb.com>
  */
 
-globalData = new Object();
-
-parentData = new Array();
+globalData	= 	new Object();
+changeLog	=	new Object();
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -41,6 +40,7 @@ function getInstancesAndParents()
 {
 	$("#mainBody").tabs("enable", "locationBoard");
 	$("#mainBody").tabs("option", "active", 1);
+	$("#mainBody").tabs("disable", "login"); // No logging back in for this iteration
 
 	/**
 	 * Get all the instances - public or private
@@ -99,55 +99,5 @@ function getInstancesAndParents()
 			}
 		);
 	
-	/**
-	 * Make display stuff happen
-	 */
-	if(Object.keys(publicInstances).length > 0)
-	{
-		publicBuilder(publicInstances);
-	}
-	
-	if(Object.keys(privateParents).length > 0)
-	{
-		parentBuilder(parentInstances, privateParents);
-	}
-	
-	
-	$locationBoard = $("#locationBoard");
-	$locationBoard.packery(
-		{
-			itemSelector: '.instanceLocation',
-			gutter: 10
-		}
-	);
-	
-	//$(".instanceLocation").draggable();
-	//$locationBoard.packery('bindUIDraggableEvents', $(".instanceLocation"));
-	$(".instance").draggable(
-		{
-			revert: "invalid"
-		}
-	); // Make the instance divs draggable
-	
-	// Make them droppable
-	$(".instanceLocation").droppable(
-		{
-			accept: function(draggable)
-			{
-				if($(draggable).attr("data-zone") == $(this).attr("data-zone")) {return true;}
-			},
-			drop: function(event, ui)
-				{
-					$(ui.draggable).css({top: 0, left: 0}).appendTo($(this)); // Actually relocate the instance div
-				
-					if($(this).height() > $("#locationBoard").height()) // Upsize #locationBoard if needed
-					{
-						$("#locationBoard").height($(this).height() + 20);
-					}
-					
-					$locationBoard.packery(); // Rerun this to prevent overflow issues..
-				}
-		}
-	);
-	// End display stuff \\
+	initialDisplay(); // Execute display operations
 }
