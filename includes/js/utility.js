@@ -14,7 +14,10 @@ function splitter(items) // Generate a breakdown of regular instances by zone as
 	{
 		if(items[i].parent != undefined) // Get Private Parent Instances
 		{
-			parentInstances[items[i].parent] = new Array();
+			if(parentInstances[items[i].parent] == undefined) // only create the new array if it doesn't exist
+			{
+				parentInstances[items[i].parent] = new Array();
+			}
 			parentInstances[items[i].parent].push(items[i]); // Dump child information to the associate parent
 		}
 		else // Get Public Cloud Instances
