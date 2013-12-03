@@ -56,3 +56,15 @@ div.instance:hover
 	top: 90%;
 	border-top: 1px solid #808080;
 }
+
+.ui-progressbar
+{
+	position: relative;
+}
+.progressbar-value-label
+{
+	position: absolute;
+	width: 100%;
+	font-size: 12px;
+	text-align: center;
+}

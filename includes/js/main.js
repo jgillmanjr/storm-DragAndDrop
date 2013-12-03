@@ -13,21 +13,21 @@ function credCheck() // Make sure the creds are legit, yo
 			type: 'POST',
 			data:
 				{
-					user: $("#loginUser").val(),
-					pass: $("#loginPass").val(),
+					user: $('#loginUser').val(),
+					pass: $('#loginPass').val(),
 					method: 'Utilities/Info/ping'
 				},
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					if(data == "null")
+					if(data == 'null')
 					{
-						alert("Null return. Most likely invalid creds");
+						alert('Null return. Most likely invalid creds');
 					}
 					else
 					{
-						globalData.user = $("#loginUser").val();
-						globalData.pass = $("#loginPass").val();
+						globalData.user = $('#loginUser').val();
+						globalData.pass = $('#loginPass').val();
 						console.log(JSON.parse(data));
 						getInstancesAndParents();
 					}
@@ -38,9 +38,9 @@ function credCheck() // Make sure the creds are legit, yo
 
 function getInstancesAndParents()
 {
-	$("#mainBody").tabs("enable", "locationBoard");
-	$("#mainBody").tabs("option", "active", 1);
-	$("#mainBody").tabs("disable", "login"); // No logging back in for this iteration
+	$('#mainBody').tabs('enable', 'locationBoard');
+	$('#mainBody').tabs('option', 'active', 1);
+	$('#mainBody').tabs('disable', 'login'); // No logging back in for this iteration
 
 	/**
 	 * Get all the instances - public or private
