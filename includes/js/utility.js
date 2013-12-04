@@ -34,18 +34,21 @@ function publicBuilder(instances)
 {	
 	$('#locationBoard').append('<div class="instanceLocation" id="publicCloud"></div>'); // Create the div for public cloud instances
 	$('#publicCloud').append('<p class="locationHeader header">Public Cloud Instances</p>');
-
-	var i; // Instance itterator
-
-	for(i = 0; i <= (instances.length - 1); ++i)
+	
+	if(instances.length > 0) // We still want to be able to build the public div even w/o instances
 	{
-		workingInstance = instances[i];
-		$('#publicCloud').append('<div class="instance" id="' + workingInstance.uniq_id + '" data-zone="' + workingInstance.zone.id + '" data-origin="publicCloud"></div>'); // Instance Div
-		$('#'+workingInstance.uniq_id).append('<p class="instanceHeader header">' + workingInstance.domain + '</p>');
-		$('#'+workingInstance.uniq_id).append('<p class="instanceData">Disk: ' + workingInstance.diskspace + ' </p>');
-		$('#'+workingInstance.uniq_id).append('<p class="instanceData">Memory: ' + workingInstance.memory + ' </p>');
-		$('#'+workingInstance.uniq_id).append('<p class="instanceData">vCPU: ' + workingInstance.vcpu + '</p>');
-		$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
+		var i; // Instance itterator
+
+		for(i = 0; i <= (instances.length - 1); ++i)
+		{
+			workingInstance = instances[i];
+			$('#publicCloud').append('<div class="instance" id="' + workingInstance.uniq_id + '" data-zone="' + workingInstance.zone.id + '" data-origin="publicCloud"></div>'); // Instance Div
+			$('#'+workingInstance.uniq_id).append('<p class="instanceHeader header">' + workingInstance.domain + '</p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Disk: ' + workingInstance.diskspace + ' </p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Memory: ' + workingInstance.memory + ' </p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData">vCPU: ' + workingInstance.vcpu + '</p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
+		}
 	}
 }
 
@@ -118,10 +121,8 @@ function parentBuilder(instances, parents)
 
 function initialDisplay() // Run this stuff for the initial #locationBoard buildout
 {
-	if(Object.keys(publicInstances).length > 0)
-	{
-		publicBuilder(publicInstances);
-	}
+
+	publicBuilder(publicInstances);
 	
 	if(Object.keys(privateParents).length > 0)
 	{
@@ -193,13 +194,18 @@ function instanceChangeLog(instanceID, newLocation, origin)
 				updateDisk = $('#'+newLocation+'diskBar').progressbar('option', 'value') + Number(allInstances[instanceID].diskspace);
 				$('#'+newLocation+'diskBar').progressbar('option', 'value', updateDisk);
 			}
+			else // Moving to the public cloud
+			{
+				// Select configuration - finish out in the callback of the config form
+				selectConfig(instanceID, allInstances[instanceID].zone.id);
+			}
 		}
 	}
 	else // Instance is not currently in the origin
 	{
 		if(newLocation == origin) // The instance is going back home
 		{
-			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent
+			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent. This should only change if the instance hasn't been actually resized onto the parent moving from
 			{
 				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - Number(allInstances[instanceID].memory);
 				$('#'+ changeLog[instanceID].location + 'ramBar').progressbar('option', 'value', updateRam);
@@ -236,6 +242,12 @@ function instanceChangeLog(instanceID, newLocation, origin)
 				updateDisk = $('#'+newLocation+'diskBar').progressbar('option', 'value') + Number(allInstances[instanceID].diskspace);
 				$('#'+newLocation+'diskBar').progressbar('option', 'value', updateDisk);
 			}
+			else // Moving to the public cloud
+			{
+				// Select configuration - finish out in the callback of the config form
+				selectConfig(instanceID, allInstances[instanceID].zone.id);
+				
+			}
 		}
 	}
 	
@@ -269,14 +281,13 @@ function doStuff()
 					parent: changeLog[currentIteration].location
 				};
 		}
-		else // Not a private parent we're going to - still needs work...
+		else // Going to the public cloud
 		{
-			/*
 			passParams =
 				{
-					uniq_id: currentIteration
+					uniq_id: currentIteration,
+					config_id: changeLog[currentIteration].configID
 				};
-			*/
 		}
 		$.ajax('apiProxy.php',
 			{
@@ -297,4 +308,115 @@ function doStuff()
 			}
 		);
 	}
+	
+	// Closeout stuff
+	$('.instance').draggable('disable'); // Disable dragging
+	$('#saveChanges').attr('disabled', true); // Disable the execute button
+	alert(
+		"Your changes have been executed. You can verify by looking at the JS console or by looking at your management interface.\n" +
+		"We have disabled the page to prevent inadvertant errors."
+	);
+}
+
+function getConfigs()
+{
+	// Populate the config list and sort by zone
+	$.ajax('apiProxy.php',
+		{
+			type: 'POST',
+			dataType: 'json',
+			async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					method: 'Storm/Config/list',
+					params: JSON.stringify(
+						{
+							page_size: 999,
+							category: 'all'
+						}
+					)
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					configs.unsorted = data.items;
+					
+					// Sort configs by zone - doing it lazy like for now..
+					configs.zoneSorted = new Object;
+					configs.zoneSorted[8] = new Array;
+					configs.zoneSorted[10] = new Array;
+					configs.zoneSorted[12] = new Array;
+					configs.zoneSorted[15] = new Array;
+					
+					var i;
+					for(i = 0; i <= (configs.unsorted.length - 1); ++i)
+					{
+						var j; // For iterating through zones
+						for(j = 0; j <= (Object.keys(configs.unsorted[i].zone_availability).length - 1); ++j)
+						{
+							if(configs.unsorted[i].zone_availability[Object.keys(configs.unsorted[i].zone_availability)[j]] == 1) // If there is zone availability
+							{
+								configs.zoneSorted[Object.keys(configs.unsorted[i].zone_availability)[j]].push(configs.unsorted[i]);
+							}
+						}
+					}
+				}
+		}
+	);
+}
+
+function selectConfig(instanceID, zone)
+{
+	// Cleanout
+	$('#configTable').empty();
+	// Generate the selection dialog
+	
+	$('#configTable').append('<tr><th><input type="hidden" id="hiddenID" value="' + instanceID + '"></th><th>Description</th><th>Memory</th><th>Disk</th><th>vCPU</th></tr>');
+	var i;
+	for(i = 0; i <= (configs.zoneSorted[zone].length - 1); ++i)
+	{
+		// Resource abstraction stuff..
+		if(configs.zoneSorted[zone][i].memory == undefined)
+		{
+			ram = configs.zoneSorted[zone][i].ram_available;
+		}
+		else
+		{
+			ram = configs.zoneSorted[zone][i].memory;
+		}
+		
+		if(configs.zoneSorted[zone][i].disk == undefined)
+		{
+			disk = configs.zoneSorted[zone][i].disk_total;
+		}
+		else
+		{
+			disk = configs.zoneSorted[zone][i].disk;
+		}
+		
+		if(configs.zoneSorted[zone][i].vcpu == undefined)
+		{
+			cpu = configs.zoneSorted[zone][i].cpu_cores;
+		}
+		else
+		{
+			cpu = configs.zoneSorted[zone][i].vcpu;
+		}
+		
+		// End resource abstraction
+		$('#configTable').append(
+			'<tr>' +
+			'<td><input type="radio" name="configRadio" value="' + configs.zoneSorted[zone][i].id + '"></td>' +
+			'<td>' + configs.zoneSorted[zone][i].description + '</td>' +
+			'<td>' + ram + ' MB</td>' +
+			'<td>' + disk + ' GB</td>' +
+			'<td>' + cpu + '</td>' +
+			'</tr>'
+		);
+	}
+	
+	// Display the dialog and finish the process in the callback from the form submit
+	$('#configChooser').dialog('open');
 }

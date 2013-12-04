@@ -68,3 +68,10 @@ div.instance:hover
 	font-size: 12px;
 	text-align: center;
 }
+
+#configTable
+{
+	text-align: center;
+	position: absolute;
+	left: 20%;
+}
