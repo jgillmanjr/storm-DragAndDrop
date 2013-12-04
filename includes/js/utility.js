@@ -314,7 +314,7 @@ function doStuff()
 	$('#saveChanges').attr('disabled', true); // Disable the execute button
 	alert(
 		"Your changes have been executed. You can verify by looking at the JS console or by looking at your management interface.\n" +
-		"We have disabled the page to prevent inadvertant errors."
+		"We have disabled the page to prevent inadvertent errors."
 	);
 }
 
