@@ -148,7 +148,22 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 		{
 			accept:	function(draggable) // Define what is a valid drop
 			{
-				if(($(draggable).attr('data-zone') == $(this).attr('data-zone')) | ($(this).attr('id') == 'publicCloud')) {return true;}
+				if($(this).attr('id') != 'publicCloud') // Anything should be able to go into the public cloud
+				{
+					if(($(draggable).attr('data-zone') != $(this).attr('data-zone'))) {return false;} // Zone check
+					
+					if( // Max sure that the addition won't drive the ram over the parent max
+						(Number(allInstances[$(draggable).attr('id')].memory) + Number($('#' + $(this).attr('id') + 'ramBar').progressbar('option', 'value'))) > // This line gets what the new value would be
+						Number($('#' + $(this).attr('id') + 'ramBar').progressbar('option', 'max'))
+					) {return false;}
+					
+					if( // Max sure that the addition won't drive the disk over the parent max
+						(Number(allInstances[$(draggable).attr('id')].diskspace) + Number($('#' + $(this).attr('id') + 'diskBar').progressbar('option', 'value'))) > // This line gets what the new value would be
+						Number($('#' + $(this).attr('id') + 'diskBar').progressbar('option', 'max'))
+					) {return false;}
+				}
+				
+				return true; // Return true if it was able to pass the gauntlet
 			},
 			drop: function(event, ui)
 				{
@@ -325,7 +340,7 @@ function getConfigs()
 		{
 			type: 'POST',
 			dataType: 'json',
-			async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
+			//async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
 			data:
 				{
 					user: globalData.user,
