@@ -148,7 +148,6 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 		{
 			accept:	function(draggable) // Define what is a valid drop
 			{
-				console.log($(draggable).attr('data-origin'));
 				if($(this).attr('id') != 'publicCloud')// Anything should be able to go into the public cloud
 				{
 					if($(this).attr('id') == $(draggable).attr('data-origin')) {return true;} // Any instance should be able to go back home
@@ -192,7 +191,7 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 
 function instanceChangeLog(instanceID, newLocation, origin)
 {
-	if(changeLog[instanceID] == undefined) // Instance is currently still in the origin
+	if(changeLog[instanceID] == undefined) // Instance is currently still in the origin at time of move
 	{
 		if(newLocation != origin) // Don't add anything if it got dropped back in the origin
 		{
@@ -217,13 +216,23 @@ function instanceChangeLog(instanceID, newLocation, origin)
 				// Select configuration - finish out in the callback of the config form
 				selectConfig(instanceID, allInstances[instanceID].zone.id);
 			}
+			
+			// Tag the card with the origin to indicate that it's not in its origin
+			if(origin == 'publicCloud')
+			{
+				$('#' + instanceID).append('<p class="instanceData originIndicator">Origin: Public Cloud</p>');
+			}
+			else
+			{
+				$('#' + instanceID).append('<p class="instanceData originIndicator">Origin: ' + privateParents[origin].domain + '</p>');
+			}
 		}
 	}
-	else // Instance is not currently in the origin
+	else // Instance is not currently in the origin at time of move
 	{
 		if(newLocation == origin) // The instance is going back home
 		{
-			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent. This should only change if the instance hasn't been actually resized onto the parent moving from
+			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent.
 			{
 				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - Number(allInstances[instanceID].memory);
 				$('#'+ changeLog[instanceID].location + 'ramBar').progressbar('option', 'value', updateRam);
@@ -231,6 +240,9 @@ function instanceChangeLog(instanceID, newLocation, origin)
 				updateDisk = $('#' + changeLog[instanceID].location + 'diskBar').progressbar('option', 'value') - Number(allInstances[instanceID].diskspace);
 				$('#'+ changeLog[instanceID].location + 'diskBar').progressbar('option', 'value', updateDisk);
 			}
+			
+			// Remove the origin flag
+			$('#' + instanceID + '> .originIndicator').remove();
 			
 			delete changeLog[instanceID];
 		}
@@ -343,7 +355,7 @@ function getConfigs()
 		{
 			type: 'POST',
 			dataType: 'json',
-			//async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
+			async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
 			data:
 				{
 					user: globalData.user,
@@ -391,11 +403,6 @@ function selectConfig(instanceID, zone)
 	$('#configTable').empty();
 	
 	// Generate the config table
-	while(configs.zoneSorted[zone] == undefined) // Keep this thing sleeping until the zone sorted config list is ready
-	{
-		setTimeout(function(){}, 1000); // Sleep for a second
-	}
-	
 	tableColumns =
 		[
 		 	{sTitle: '<input type="hidden" id="hiddenID" value="' + instanceID + '">'},

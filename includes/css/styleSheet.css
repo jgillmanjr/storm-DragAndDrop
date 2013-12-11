@@ -45,6 +45,11 @@ p.instanceData
 	font-size: 15px; 
 }
 
+p.originIndicator
+{
+	color: red;
+}
+
 div.instance:hover
 {
 	background-color: rgba(188, 207,209, 20)
