@@ -148,8 +148,11 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 		{
 			accept:	function(draggable) // Define what is a valid drop
 			{
-				if($(this).attr('id') != 'publicCloud') // Anything should be able to go into the public cloud
+				console.log($(draggable).attr('data-origin'));
+				if($(this).attr('id') != 'publicCloud')// Anything should be able to go into the public cloud
 				{
+					if($(this).attr('id') == $(draggable).attr('data-origin')) {return true;} // Any instance should be able to go back home
+					
 					if(($(draggable).attr('data-zone') != $(this).attr('data-zone'))) {return false;} // Zone check
 					
 					if( // Max sure that the addition won't drive the ram over the parent max
@@ -388,6 +391,11 @@ function selectConfig(instanceID, zone)
 	$('#configTable').empty();
 	
 	// Generate the config table
+	while(configs.zoneSorted[zone] == undefined) // Keep this thing sleeping until the zone sorted config list is ready
+	{
+		setTimeout(function(){}, 1000); // Sleep for a second
+	}
+	
 	tableColumns =
 		[
 		 	{sTitle: '<input type="hidden" id="hiddenID" value="' + instanceID + '">'},
