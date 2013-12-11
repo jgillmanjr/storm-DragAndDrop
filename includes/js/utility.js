@@ -371,9 +371,18 @@ function selectConfig(instanceID, zone)
 {
 	// Cleanout
 	$('#configTable').empty();
-	// Generate the selection dialog
 	
-	$('#configTable').append('<tr><th><input type="hidden" id="hiddenID" value="' + instanceID + '"></th><th>Description</th><th>Memory</th><th>Disk</th><th>vCPU</th></tr>');
+	// Generate the config table
+	tableColumns =
+		[
+		 	{sTitle: '<input type="hidden" id="hiddenID" value="' + instanceID + '">'},
+		 	{sTitle: 'Description'},
+		 	{sTitle: 'Memory', sClass: 'center'},
+		 	{sTitle: 'Disk', sClass: 'center'},
+		 	{sTitle: 'vCPU', sClass: 'center'}
+		];
+	
+	tableData = new Array();
 	var i;
 	for(i = 0; i <= (configs.zoneSorted[zone].length - 1); ++i)
 	{
@@ -406,16 +415,19 @@ function selectConfig(instanceID, zone)
 		}
 		
 		// End resource abstraction
-		$('#configTable').append(
-			'<tr>' +
-			'<td><input type="radio" name="configRadio" value="' + configs.zoneSorted[zone][i].id + '"></td>' +
-			'<td>' + configs.zoneSorted[zone][i].description + '</td>' +
-			'<td>' + ram + ' MB</td>' +
-			'<td>' + disk + ' GB</td>' +
-			'<td>' + cpu + '</td>' +
-			'</tr>'
+		
+		tableData.push(
+			[
+			 '<input type="radio" name="configRadio" value="' + configs.zoneSorted[zone][i].id + '">',
+			 configs.zoneSorted[zone][i].description,
+			 ram + ' MB',
+			 disk + ' GB',
+			 cpu
+			]
 		);
 	}
+	
+	$('#configTable').dataTable({aoColumns: tableColumns, aaData: tableData});
 	
 	// Display the dialog and finish the process in the callback from the form submit
 	$('#configChooser').dialog('open');
