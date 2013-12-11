@@ -399,9 +399,6 @@ function getConfigs()
 
 function selectConfig(instanceID, zone)
 {
-	// Cleanout
-	$('#configTable').empty();
-	
 	// Generate the config table
 	tableColumns =
 		[
@@ -457,7 +454,13 @@ function selectConfig(instanceID, zone)
 		);
 	}
 	
-	$('#configTable').dataTable({aoColumns: tableColumns, aaData: tableData});
+	configDataTable = $('#configTable').dataTable(
+		{
+			bDestroy: true, // This will clean out the table first 
+			aoColumns: tableColumns,
+			aaData: tableData
+		}
+	);
 	
 	// Display the dialog and finish the process in the callback from the form submit
 	$('#configChooser').dialog('open');

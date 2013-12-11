@@ -70,7 +70,7 @@ function getInstancesAndParents()
 				 		text: 'Select Config',
 				 		click: function()
 				 			{
-				 			changeLog[$('#hiddenID').val()].configID = $('[name="configRadio"]:checked').val();
+				 				changeLog[$('#hiddenID').val()].configID = $('[name="configRadio"]:checked').val();
 				 				$(this).dialog('close');
 				 			}
 				 	}
