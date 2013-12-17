@@ -465,3 +465,59 @@ function selectConfig(instanceID, zone)
 	// Display the dialog and finish the process in the callback from the form submit
 	$('#configChooser').dialog('open');
 }
+
+function instanceSizer(targetID, instanceID)
+{
+	sizerDiv = '<div id="instanceSizer">' +
+		'<div id="memSlider"></div>' +
+		'<div id="diskSlider"></div>' +
+		'<div id="vcpuSlider"></div>' +
+		'</div>';
+	
+	$('body').append(sizerDiv);
+	
+	// Determine resource minimums
+		
+	// End minimum determination
+	
+	$('#memSlider').slider(
+		{
+			max: $('#' + targetID + 'ramBar').progressbar('option', 'max'),
+			
+		}
+	);
+	
+	
+	$('#instanceSizer').dialog(
+		{
+			title: 'Please Size your Instance',
+			modal: true,
+			resizable: false,
+			height: (window.innerHeight * (3/4)),
+			width: (window.innerWidth * (3/4)),
+			dialogClass: "no-close",
+			show:
+				{
+					effect: 'blind',
+					duration: 500
+				},
+			hide:
+				{
+					effect: 'blind',
+					duration: 500
+				},
+			autoOpen: false,
+			buttons:
+				[
+				 	{
+				 		text: 'Confirm Size',
+				 		click: function()
+				 			{
+				 				changeLog[$('#hiddenID').val()].configID = $('[name="configRadio"]:checked').val();
+				 				$(this).dialog('close');
+				 			}
+				 	}
+				]
+		}
+	);
+}

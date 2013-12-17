@@ -6,6 +6,7 @@
 globalData	= 	new Object();
 changeLog	=	new Object();
 configs		=	new Object();
+instanceMinimums	=	new Object();
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -30,8 +31,53 @@ function credCheck() // Make sure the creds are legit, yo
 						globalData.user = $('#loginUser').val();
 						globalData.pass = $('#loginPass').val();
 						console.log(JSON.parse(data));
+						getMinimums();
 						getInstancesAndParents();
 					}
+				}
+		}
+	);
+}
+
+function getMinimums()
+{
+	// Get the actual minimums
+	$.ajax('apiProxy.php',
+		{
+			type: 'POST',
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					method: 'Account/Limits/dynamicChild'
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					instanceMinimums.self 	=	data.Unmanaged;
+					instanceMinimums.core	=	data.Managed;
+					instanceMinimums.full	=	data.Managed;
+					instanceMinimums.win	=	data.Windows;
+				}
+		}
+	);
+	
+	// Get the OS for an associated template (for Linux/Windows differentiation)
+	$.ajax('apiProxy.php',
+		{
+			type: 'POST',
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					method: 'Storm/Template/list'
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					console.log(typeof data.items);
+					//var i;
+					//for(i = 0; Object.keys(data.itsems))
 				}
 		}
 	);
