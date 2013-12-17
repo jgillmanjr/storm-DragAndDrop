@@ -75,6 +75,7 @@ function getMinimums()
 			success:
 				function(data, textStatus, jqXHR)
 				{
+					console.log(data);
 					console.log(typeof data.items);
 					//var i;
 					//for(i = 0; Object.keys(data.itsems))
