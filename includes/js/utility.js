@@ -3,11 +3,27 @@
  * @author Jason Gillman Jr. <jgillman@liquidweb.com>
  */
 
+function instanceMinMap(instanceID)
+{
+	instanceOS	=	templateOS[allInstances[instanceID].template];
+	instanceMgt	=	allInstances[instanceID].manage_level;
+	
+	if(instanceOS == 'Windows')
+	{
+		instanceMinimums[instanceID]	=	resourceMinimums.win;
+	}
+	else
+	{
+		instanceMinimums[instanceID]	=	resourceMinimums[instanceMgt];
+	}
+}
+
 function splitter(items) // Generate a breakdown of regular instances by zone as well as private parent instances
 {
-	allInstances = new Object(); // All the instance dataz
-	publicInstances = new Array(); // For Public Instances
-	parentInstances = new Object(); // For Private Parent Instances
+	allInstances	=	new Object(); // All the instance dataz
+	publicInstances	=	new Array(); // For Public Instances
+	parentInstances	=	new Object(); // For Private Parent Instances
+	
 	
 	var i;
 	for(i = 0; i <= (items.length - 1); ++i)
@@ -27,6 +43,8 @@ function splitter(items) // Generate a breakdown of regular instances by zone as
 		
 		allInstances[items[i].uniq_id] = new Object;
 		allInstances[items[i].uniq_id] = items[i];
+		
+		instanceMinMap(items[i].uniq_id); // Create the PP resource minimums
 	}
 }
 
@@ -44,12 +62,19 @@ function publicBuilder(instances)
 			workingInstance = instances[i];
 			$('#publicCloud').append('<div class="instance" id="' + workingInstance.uniq_id + '" data-zone="' + workingInstance.zone.id + '" data-origin="publicCloud"></div>'); // Instance Div
 			$('#'+workingInstance.uniq_id).append('<p class="instanceHeader header">' + workingInstance.domain + '</p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Disk: ' + workingInstance.diskspace + ' </p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Memory: ' + workingInstance.memory + ' </p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData">vCPU: ' + workingInstance.vcpu + '</p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData diskData">Disk: ' + workingInstance.diskspace + ' </p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData memData">Memory: ' + workingInstance.memory + ' </p>');
+			$('#'+workingInstance.uniq_id).append('<p class="instanceData vcpuData">vCPU: ' + workingInstance.vcpu + '</p>');
 			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
 		}
 	}
+}
+
+function freeResourceUpdate(parentID)
+{
+	freeResources[parentID]	=	new Object;
+	freeResources[parentID].memory	=	($('#' + parentID + 'ramBar').progressbar('option', 'max') - $('#' + parentID + 'ramBar').progressbar('option', 'value'));
+	freeResources[parentID].disk	=	($('#' + parentID + 'diskBar').progressbar('option', 'max') - $('#' + parentID + 'diskBar').progressbar('option', 'value'));
 }
 
 function parentBuilder(instances, parents)
@@ -68,9 +93,6 @@ function parentBuilder(instances, parents)
 		// Resource Bar Stuff
 		$('#'+currentParentUniqID).append('<div class="ramBar" id="' + currentParentUniqID + 'ramBar"><div class="progressbar-value-label"></div></div>');
 		$('#'+currentParentUniqID).append('<div class="diskBar" id="' + currentParentUniqID + 'diskBar"><div class="progressbar-value-label"></div></div>');
-		
-		//ramBar = $('#'+currentParentUniqID+'ramBar');
-		//diskBar = $('#'+currentParentUniqID+'diskBar');
 		
 		$('#'+currentParentUniqID+'ramBar').progressbar( // Memory bar
 			{
@@ -116,12 +138,12 @@ function parentBuilder(instances, parents)
 				$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
 			}
 		}
+		freeResourceUpdate(currentParentUniqID);
 	}
 }
 
 function initialDisplay() // Run this stuff for the initial #locationBoard buildout
 {
-
 	publicBuilder(publicInstances);
 	
 	if(Object.keys(privateParents).length > 0)
@@ -154,13 +176,13 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 					
 					if(($(draggable).attr('data-zone') != $(this).attr('data-zone'))) {return false;} // Zone check
 					
-					if( // Max sure that the addition won't drive the ram over the parent max
-						(Number(allInstances[$(draggable).attr('id')].memory) + Number($('#' + $(this).attr('id') + 'ramBar').progressbar('option', 'value'))) > // This line gets what the new value would be
+					if( // Make sure that the addition won't drive the ram over the parent max
+						(Number(instanceMinimums[$(draggable).attr('id')].Memory) + Number($('#' + $(this).attr('id') + 'ramBar').progressbar('option', 'value'))) > // This line gets what the new value would be
 						Number($('#' + $(this).attr('id') + 'ramBar').progressbar('option', 'max'))
 					) {return false;}
 					
-					if( // Max sure that the addition won't drive the disk over the parent max
-						(Number(allInstances[$(draggable).attr('id')].diskspace) + Number($('#' + $(this).attr('id') + 'diskBar').progressbar('option', 'value'))) > // This line gets what the new value would be
+					if( // Make sure that the addition won't drive the disk over the parent max
+						(Number(instanceMinimums[$(draggable).attr('id')].Disk) + Number($('#' + $(this).attr('id') + 'diskBar').progressbar('option', 'value'))) > // This line gets what the new value would be
 						Number($('#' + $(this).attr('id') + 'diskBar').progressbar('option', 'max'))
 					) {return false;}
 				}
@@ -200,16 +222,7 @@ function instanceChangeLog(instanceID, newLocation, origin)
 			if(newLocation != 'publicCloud') // If moving to a private parent
 			{
 				changeLog[instanceID].location = newLocation; // Set the new location
-				changeLog[instanceID].diskspace = allInstances[instanceID].diskspace;
-				changeLog[instanceID].vcpu = allInstances[instanceID].vcpu;
-				changeLog[instanceID].memory = allInstances[instanceID].memory;
-				
-				// Resource bar changes
-				updateRam = $('#'+newLocation+'ramBar').progressbar('option', 'value') + Number(allInstances[instanceID].memory);
-				$('#'+newLocation+'ramBar').progressbar('option', 'value', updateRam);
-				
-				updateDisk = $('#'+newLocation+'diskBar').progressbar('option', 'value') + Number(allInstances[instanceID].diskspace);
-				$('#'+newLocation+'diskBar').progressbar('option', 'value', updateDisk);
+				instanceSizer(newLocation, instanceID); // Execute sizing window
 			}
 			else // Moving to the public cloud
 			{
@@ -234,11 +247,14 @@ function instanceChangeLog(instanceID, newLocation, origin)
 		{
 			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent.
 			{
-				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - Number(allInstances[instanceID].memory);
+				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - changeLog[instanceID].memory;
 				$('#'+ changeLog[instanceID].location + 'ramBar').progressbar('option', 'value', updateRam);
 				
-				updateDisk = $('#' + changeLog[instanceID].location + 'diskBar').progressbar('option', 'value') - Number(allInstances[instanceID].diskspace);
+				updateDisk = $('#' + changeLog[instanceID].location + 'diskBar').progressbar('option', 'value') - changeLog[instanceID].diskspace;
 				$('#'+ changeLog[instanceID].location + 'diskBar').progressbar('option', 'value', updateDisk);
+				
+				freeResourceUpdate(changeLog[instanceID].location);
+				instanceDataUpdate(instanceID, allInstances[instanceID].diskspace, allInstances[instanceID].memory, allInstances[instanceID].vcpu);
 			}
 			
 			// Remove the origin flag
@@ -250,33 +266,25 @@ function instanceChangeLog(instanceID, newLocation, origin)
 		{
 			if(changeLog[instanceID].location != 'publicCloud') // Decrease the reported usage if an instance is moved off a private parent
 			{
-				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - Number(allInstances[instanceID].memory);
+				updateRam = $('#' + changeLog[instanceID].location + 'ramBar').progressbar('option', 'value') - changeLog[instanceID].memory;
 				$('#'+ changeLog[instanceID].location + 'ramBar').progressbar('option', 'value', updateRam);
 				
-				updateDisk = $('#' + changeLog[instanceID].location + 'diskBar').progressbar('option', 'value') - Number(allInstances[instanceID].diskspace);
+				updateDisk = $('#' + changeLog[instanceID].location + 'diskBar').progressbar('option', 'value') - changeLog[instanceID].diskspace;
 				$('#'+ changeLog[instanceID].location + 'diskBar').progressbar('option', 'value', updateDisk);
+				
+				freeResourceUpdate(changeLog[instanceID].location);
 			}
 			
 			if(newLocation != 'publicCloud') // Moving to a private parent
 			{
-				if(changeLog[instanceID].configID != undefined) {delete changeLog[instanceID].configID;} // If the location was changed from the public cloud to a different private parent than the one it's on
-				changeLog[instanceID].location = newLocation;
-				changeLog[instanceID].diskspace = allInstances[instanceID].diskspace;
-				changeLog[instanceID].vcpu = allInstances[instanceID].vcpu;
-				changeLog[instanceID].memory = allInstances[instanceID].memory;
-				
-				// Resource bar changes
-				updateRam = $('#'+newLocation+'ramBar').progressbar('option', 'value') + Number(allInstances[instanceID].memory);
-				$('#'+newLocation+'ramBar').progressbar('option', 'value', updateRam);
-				
-				updateDisk = $('#'+newLocation+'diskBar').progressbar('option', 'value') + Number(allInstances[instanceID].diskspace);
-				$('#'+newLocation+'diskBar').progressbar('option', 'value', updateDisk);
+				if(changeLog[instanceID].configID != undefined) {delete changeLog[instanceID].configID;} // If the location was changed from the public cloud to a different private parent than the one it's on. Basically, if the origin is a private parent, instance moved to public cloud, but then moved to another private parent
+				changeLog[instanceID].location = newLocation; // Set the new location
+				instanceSizer(newLocation, instanceID); // Execute sizing window
 			}
 			else // Moving to the public cloud
 			{
 				// Select configuration - finish out in the callback of the config form
 				selectConfig(instanceID, allInstances[instanceID].zone.id);
-				
 			}
 		}
 	}
@@ -355,7 +363,7 @@ function getConfigs()
 		{
 			type: 'POST',
 			dataType: 'json',
-			async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
+			//async: false, // This is to keep errors from getting thrown (and subsequently the dialog box from being jacked up) if the dialog is opened too quick
 			data:
 				{
 					user: globalData.user,
@@ -466,35 +474,116 @@ function selectConfig(instanceID, zone)
 	$('#configChooser').dialog('open');
 }
 
+function instanceDataUpdate(instanceID, disk, memory, vCPU)
+{
+	$('#' + instanceID + ' .diskData').text('Disk: ' + disk);
+	$('#' + instanceID + ' .memData').text('Memory: ' + memory);
+	$('#' + instanceID + ' .vcpuData').text('vCPU: ' + vCPU);
+}
+
 function instanceSizer(targetID, instanceID)
 {
 	sizerDiv = '<div id="instanceSizer">' +
-		'<div id="memSlider"></div>' +
-		'<div id="diskSlider"></div>' +
-		'<div id="vcpuSlider"></div>' +
+		'<div class="sliderValue">Memory: <input id="memValue" type="text">MB</div><div id="memSlider"></div>' +
+		'<div class="sliderValue">Disk: <input id="diskValue" type="text">GB</div><div id="diskSlider"></div>' +
+		'<div class="sliderValue">vCPU: <input id="vcpuValue" type="text">Cores</div><div id="vcpuSlider"></div>' +
 		'</div>';
 	
 	$('body').append(sizerDiv);
 	
-	// Determine resource minimums
-		
-	// End minimum determination
-	
-	$('#memSlider').slider(
+	// We need a way to make sure the value of the memory slider doesn't go over the max free
+	if(Number(allInstances[instanceID].memory) > Number(freeResources[targetID].memory))
+	{
+		sizerMem	=	Number(freeResources[targetID].memory);
+	}
+	else
+	{
+		sizerMem	=	Number(allInstances[instanceID].memory);
+	}
+	memSlider = $('#memSlider').slider(
 		{
-			max: $('#' + targetID + 'ramBar').progressbar('option', 'max'),
-			
+			min:	instanceMinimums[instanceID].Memory,
+			max:	freeResources[targetID].memory,
+			value:	sizerMem,
+			slide:	function(event, ui)
+				{
+					$('#memValue').val(ui.value);
+				}
 		}
 	);
+	$('#memValue').val($('#memSlider').slider('option', 'value'));
 	
+	// We need a way to make sure the value of the disk slider doesn't go over the max
+	if(Number(allInstances[instanceID].diskspace) > Number(freeResources[targetID].disk))
+	{
+		sizerDisk	=	Number(freeResources[targetID].disk);
+	}
+	else
+	{
+		sizerDisk	=	Number(allInstances[instanceID].diskspace);
+	}
+	diskSlider = $('#diskSlider').slider(
+		{
+			min:	instanceMinimums[instanceID].Disk,
+			max:	freeResources[targetID].disk,
+			value:	sizerDisk,
+			slide:	function(event, ui)
+			{
+				$('#diskValue').val(ui.value);
+			}
+		}
+	);
+	$('#diskValue').val($('#diskSlider').slider('option', 'value'));
+	
+	// We need a way to make sure the value of the vCPU slider doesn't go over the max
+	if(Number(allInstances[instanceID].vcpu) > Number(privateParents[targetID].vcpu))
+	{
+		sizerCPU	=	Number(privateParents[targetID].vcpu);
+	}
+	else
+	{
+		sizerCPU	=	Number(allInstances[instanceID].vcpu);
+	}
+	vcpuSlider = $('#vcpuSlider').slider(
+		{
+			min:	instanceMinimums[instanceID].Cpu,
+			max:	Number(privateParents[targetID].vcpu),
+			value:	sizerCPU,
+			slide:	function(event, ui)
+			{
+				$('#vcpuValue').val(ui.value);
+			}
+		}
+	);
+	$('#vcpuValue').val($('#vcpuSlider').slider('option', 'value'));
+	
+	// Update the sliders based on typed in values
+	$('#memValue').change(function()
+		{
+			$('#memSlider').slider('option', 'value', this.value);
+		}	
+	);
+	
+	$('#diskValue').change(function()
+		{
+			$('#diskSlider').slider('option', 'value', this.value);
+		}	
+	);
+	
+	$('#vcpuValue').change(function()
+		{
+			$('#vcpuSlider').slider('option', 'value', this.value);
+		}	
+	);
+	// End typed in values section
 	
 	$('#instanceSizer').dialog(
 		{
 			title: 'Please Size your Instance',
 			modal: true,
 			resizable: false,
-			height: (window.innerHeight * (3/4)),
-			width: (window.innerWidth * (3/4)),
+			height: 350,
+			width: 500,
 			dialogClass: "no-close",
 			show:
 				{
@@ -513,11 +602,37 @@ function instanceSizer(targetID, instanceID)
 				 		text: 'Confirm Size',
 				 		click: function()
 				 			{
-				 				changeLog[$('#hiddenID').val()].configID = $('[name="configRadio"]:checked').val();
+					 			// Update the changelog
+								changeLog[instanceID].diskspace = $('#diskSlider').slider('option', 'value');
+								changeLog[instanceID].vcpu = $('#vcpuSlider').slider('option', 'value');
+								changeLog[instanceID].memory = $('#memSlider').slider('option', 'value');
+								//
+								
+								// Resource bar changes
+								updateRam = $('#' + targetID + 'ramBar').progressbar('option', 'value') + Number($('#memSlider').slider('option', 'value'));
+								$('#' + targetID + 'ramBar').progressbar('option', 'value', updateRam);
+								
+								updateDisk = $('#' + targetID + 'diskBar').progressbar('option', 'value') + Number($('#diskSlider').slider('option', 'value'));
+								$('#' + targetID + 'diskBar').progressbar('option', 'value', updateDisk);
+								//
+								
+								// Update p.instanceData
+								instanceDataUpdate(instanceID, changeLog[instanceID].diskspace, changeLog[instanceID].memory, changeLog[instanceID].vcpu)
+								//
+				 				
 				 				$(this).dialog('close');
+				 				
+								// Cleanup
+				 				memSlider.slider('destroy');
+				 				diskSlider.slider('destroy');
+				 				vcpuSlider.slider('destroy');
+				 				$('#instanceSizer').remove();
+				 				freeResourceUpdate(targetID);
+				 				//
 				 			}
 				 	}
 				]
 		}
 	);
+	$('#instanceSizer').dialog('open');
 }

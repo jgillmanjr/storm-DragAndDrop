@@ -79,6 +79,16 @@ div.instance:hover
 	display: none;
 }
 
+.sliderValue
+{
+	margin-bottom: 0px;
+}
+
+.sliderValue input
+{
+	width: 75px;
+}
+
 /*
 #configTable
 {

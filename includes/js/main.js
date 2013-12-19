@@ -3,10 +3,14 @@
  * @author Jason Gillman Jr. <jgillman@liquidweb.com>
  */
 
+// Global type vars
 globalData	= 	new Object();
-changeLog	=	new Object();
-configs		=	new Object();
-instanceMinimums	=	new Object();
+changeLog	=	new Object(); // Used to track what changes have happened
+configs		=	new Object(); // All public configs
+resourceMinimums	=	new Object(); // Resource minimums for an instance type (self, managed, windows)
+templateOS	=	new Object; // Template to OS pairings
+freeResources	=	new Object; // For tracking available resources on a parent from the perspective of any changes (prog bar values)
+instanceMinimums	=	new Object; // Instance resource minimums (from the perspective of a private parent)
 
 function credCheck() // Make sure the creds are legit, yo
 {
@@ -45,6 +49,8 @@ function getMinimums()
 	$.ajax('apiProxy.php',
 		{
 			type: 'POST',
+			async: false,
+			dataType:	'json',
 			data:
 				{
 					user: globalData.user,
@@ -54,10 +60,10 @@ function getMinimums()
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					instanceMinimums.self 	=	data.Unmanaged;
-					instanceMinimums.core	=	data.Managed;
-					instanceMinimums.full	=	data.Managed;
-					instanceMinimums.win	=	data.Windows;
+					resourceMinimums.self 	=	data.Unmanaged;
+					resourceMinimums.core	=	data.Managed;
+					resourceMinimums.full	=	data.Managed;
+					resourceMinimums.win	=	data.Windows;
 				}
 		}
 	);
@@ -66,19 +72,23 @@ function getMinimums()
 	$.ajax('apiProxy.php',
 		{
 			type: 'POST',
+			async: false,
+			dataType:	'json',
 			data:
 				{
 					user: globalData.user,
 					pass: globalData.pass,
-					method: 'Storm/Template/list'
+					method: 'Storm/Template/list',
+					params:	JSON.stringify({page_size: 999})
 				},
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					console.log(data);
-					console.log(typeof data.items);
-					//var i;
-					//for(i = 0; Object.keys(data.itsems))
+					var i;
+					for(i = 0; i <= (data.items.length - 1); ++i)
+					{
+						templateOS[data.items[i].name] = data.items[i].os;
+					}
 				}
 		}
 	);
