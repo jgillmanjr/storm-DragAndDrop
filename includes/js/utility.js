@@ -20,31 +20,28 @@ function instanceMinMap(instanceID)
 
 function splitter(items) // Generate a breakdown of regular instances by zone as well as private parent instances
 {
-	allInstances	=	new Object(); // All the instance dataz
 	publicInstances	=	new Array(); // For Public Instances
 	parentInstances	=	new Object(); // For Private Parent Instances
 	
-	
 	var i;
-	for(i = 0; i <= (items.length - 1); ++i)
+	for(i = 0; i <= (Object.keys(items).length - 1); ++i)
 	{
-		if(items[i].parent != undefined) // Get Private Parent Instances
+		currentInstance	=	items[Object.keys(items)[i]];
+
+		if(currentInstance.parent != undefined) // Get Private Parent Instances
 		{
-			if(parentInstances[items[i].parent] == undefined) // only create the new array if it doesn't exist
+			if(parentInstances[currentInstance.parent] == undefined) // only create the new array if it doesn't exist
 			{
-				parentInstances[items[i].parent] = new Array();
+				parentInstances[currentInstance.parent] = new Array();
 			}
-			parentInstances[items[i].parent].push(items[i]); // Dump child information to the associate parent
+			parentInstances[currentInstance.parent].push(currentInstance); // Dump child information to the associate parent
 		}
 		else // Get Public Cloud Instances
 		{	
-			publicInstances.push(items[i]);
+			publicInstances.push(currentInstance);
 		}
 		
-		allInstances[items[i].uniq_id] = new Object;
-		allInstances[items[i].uniq_id] = items[i];
-		
-		instanceMinMap(items[i].uniq_id); // Create the PP resource minimums
+		instanceMinMap(currentInstance.uniq_id); // Create the PP resource minimums
 	}
 }
 
@@ -59,13 +56,8 @@ function publicBuilder(instances)
 
 		for(i = 0; i <= (instances.length - 1); ++i)
 		{
-			workingInstance = instances[i];
-			$('#publicCloud').append('<div class="instance" id="' + workingInstance.uniq_id + '" data-zone="' + workingInstance.zone.id + '" data-origin="publicCloud"></div>'); // Instance Div
-			$('#'+workingInstance.uniq_id).append('<p class="instanceHeader header">' + workingInstance.domain + '</p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData diskData">Disk: ' + workingInstance.diskspace + ' </p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData memData">Memory: ' + workingInstance.memory + ' </p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData vcpuData">vCPU: ' + workingInstance.vcpu + '</p>');
-			$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
+			workingInstance = instances[i].uniq_id;
+			instanceBuilder(workingInstance, 'publicCloud');
 		}
 	}
 }
@@ -75,6 +67,16 @@ function freeResourceUpdate(parentID)
 	freeResources[parentID]	=	new Object;
 	freeResources[parentID].memory	=	($('#' + parentID + 'ramBar').progressbar('option', 'max') - $('#' + parentID + 'ramBar').progressbar('option', 'value'));
 	freeResources[parentID].disk	=	($('#' + parentID + 'diskBar').progressbar('option', 'max') - $('#' + parentID + 'diskBar').progressbar('option', 'value'));
+}
+
+function instanceBuilder(instanceID, locationID)
+{
+	$('#' + locationID).append('<div class="instance" id="' + instanceID + '" data-zone="' + allInstances[instanceID].zone.id + '" data-origin="' + locationID + '"></div>'); //Instance Div
+	$('#' + instanceID).append('<p class="instanceHeader header">' + allInstances[instanceID].domain + '</p>');
+	$('#' + instanceID).append('<p class="instanceData diskData">Disk: ' + allInstances[instanceID].diskspace + ' </p>');
+	$('#' + instanceID).append('<p class="instanceData memData">Memory: ' + allInstances[instanceID].memory + ' </p>');
+	$('#' + instanceID).append('<p class="instanceData vcpuData">vCPU: ' + allInstances[instanceID].vcpu + '</p>');
+	$('#' + instanceID).append('<p class="instanceData">Zone: ' + allInstances[instanceID].zone.id + '</p>');
 }
 
 function parentBuilder(instances, parents)
@@ -126,16 +128,10 @@ function parentBuilder(instances, parents)
 		if(instances[currentParentUniqID] != undefined) // Don't do any instancy stuff if there are no instances on the parent
 		{
 			var j; // For indexing the instances in a parent
-			
 			for(j = 0; j <= (instances[currentParentUniqID].length - 1); ++j)
 			{
-				workingInstance = instances[currentParentUniqID][j];
-				$('#' + currentParentUniqID).append('<div class="instance" id="' + workingInstance.uniq_id + '" data-zone="' + parents[currentParentUniqID].zone.id + '" data-origin="' + currentParentUniqID + '"></div>'); //Instance Div
-				$('#'+workingInstance.uniq_id).append('<p class="instanceHeader header">' + workingInstance.domain + '</p>');
-				$('#'+workingInstance.uniq_id).append('<p class="instanceData">Disk: ' + workingInstance.diskspace + ' </p>');
-				$('#'+workingInstance.uniq_id).append('<p class="instanceData">Memory: ' + workingInstance.memory + ' </p>');
-				$('#'+workingInstance.uniq_id).append('<p class="instanceData">vCPU: ' + workingInstance.vcpu + '</p>');
-				$('#'+workingInstance.uniq_id).append('<p class="instanceData">Zone: ' + workingInstance.zone.id + '</p>');
+				workingInstance = instances[currentParentUniqID][j].uniq_id;
+				instanceBuilder(workingInstance, currentParentUniqID);
 			}
 		}
 		freeResourceUpdate(currentParentUniqID);

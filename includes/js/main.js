@@ -155,10 +155,18 @@ function getInstancesAndParents()
 			success:
 				function(data, textStatus, jqXHR)
 				{
-					splitter(data.items); // Feed splitter() all the instances
+					allInstances = new Object();
+					
+					var i;
+					for(i = 0; i <= (data.items.length - 1); ++i)
+					{
+						allInstances[data.items[i].uniq_id] = data.items[i];
+					}
 				}
 		}
 	);
+	
+	splitter(allInstances); // Break instances out by public and private parent
 	
 	/**
 	 * Get the private parents
