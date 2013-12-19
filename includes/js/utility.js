@@ -77,6 +77,26 @@ function instanceBuilder(instanceID, locationID)
 	$('#' + instanceID).append('<p class="instanceData memData">Memory: ' + allInstances[instanceID].memory + ' </p>');
 	$('#' + instanceID).append('<p class="instanceData vcpuData">vCPU: ' + allInstances[instanceID].vcpu + '</p>');
 	$('#' + instanceID).append('<p class="instanceData">Zone: ' + allInstances[instanceID].zone.id + '</p>');
+	
+	$.ajax('apiProxy.php',
+		{
+			type:	'POST',
+			dataType:	'json',
+			data:
+				{
+					user: globalData.user,
+					pass: globalData.pass,
+					method: 'Storm/Server/status',
+					params:	JSON.stringify({uniq_id: instanceID})
+				},
+			success:
+				function(data, textStatus, jqXHR)
+				{
+					$('#' + instanceID).attr('data-status', data.status);
+					$('#' + instanceID).append('<p class="instanceData">Status: ' + data.status + '</p>');
+				}
+		}
+	);
 }
 
 function parentBuilder(instances, parents)
@@ -166,6 +186,8 @@ function initialDisplay() // Run this stuff for the initial #locationBoard build
 		{
 			accept:	function(draggable) // Define what is a valid drop
 			{
+				if(($(draggable).attr('data-status') != 'Running')) {return false;} // Status check - don't drop if it's not running
+				
 				if($(this).attr('id') != 'publicCloud')// Anything should be able to go into the public cloud
 				{
 					if($(this).attr('id') == $(draggable).attr('data-origin')) {return true;} // Any instance should be able to go back home
