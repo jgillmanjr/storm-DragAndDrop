@@ -18,7 +18,7 @@
 	
 	$version = 'bleed'; // All the cool kids use bleed... plus we need it for private parent stuff
 	
-	$storm = new StormAPI($user, $pass, $method, $params, $version);
+	$storm = new \LiquidWeb\StormAPI($user, $pass, $method, $params, $version);
 	
 	echo json_encode($storm->request());
 ?>

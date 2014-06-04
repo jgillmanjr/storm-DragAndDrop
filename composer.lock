@@ -1,7 +1,8 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
     "hash": "a6b4808718b4eaabd280a9ff0a5fd28d",
     "packages": [
@@ -11,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/liquidweb/php-stormondemand.git",
-                "reference": "aee6e0ea6bba37e1aed56148bbc0a3e03d645deb"
+                "reference": "a1533ce53f6a210929ea05216d8fa63da1f5d795"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liquidweb/php-stormondemand/zipball/aee6e0ea6bba37e1aed56148bbc0a3e03d645deb",
-                "reference": "aee6e0ea6bba37e1aed56148bbc0a3e03d645deb",
+                "url": "https://api.github.com/repos/liquidweb/php-stormondemand/zipball/a1533ce53f6a210929ea05216d8fa63da1f5d795",
+                "reference": "a1533ce53f6a210929ea05216d8fa63da1f5d795",
                 "shasum": ""
             },
             "require": {
@@ -32,25 +33,24 @@
             "license": [
                 "Apache-2.0"
             ],
+            "authors": [
+                {
+                    "name": "Jason Gillman Jr.",
+                    "email": "jgillman@liquidweb.com",
+                    "role": "Developer"
+                }
+            ],
             "description": "PHP bindings for the StormOnDemand API",
             "homepage": "https://github.com/liquidweb/php-stormondemand",
-            "time": "2013-11-05 14:38:11"
+            "time": "2014-02-26 13:26:36"
         }
     ],
-    "packages-dev": [
-
-    ],
-    "aliases": [
-
-    ],
+    "packages-dev": [],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
         "liquidweb/php-stormondemand": 20
     },
-    "platform": [
-
-    ],
-    "platform-dev": [
-
-    ]
+    "platform": [],
+    "platform-dev": []
 }
